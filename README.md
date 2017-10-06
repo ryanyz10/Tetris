@@ -13,6 +13,6 @@ Tetris game and bot for playing Tetris
 
 ### Driving Table
 
-| Driver | Hours | Individual |
-|:---:|:---:|:---:|
-|This|Is|Fake|
+| Driver | Hours | Date | Individual | Comments |
+|:---:|:---:|:---:|:---:|:---:|
+|Ryan|1.5|10/06/2017|No|Rotation Code|
