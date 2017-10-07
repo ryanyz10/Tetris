@@ -1,6 +1,7 @@
 package assignment;
 
 import java.awt.*;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -16,17 +17,27 @@ public final class TetrisPiece extends Piece {
     //TODO: calculate stuff
     private TetrisPiece(Point[] body) {
         this.body = body;
+        
         // line, square or other
         // there will always be 4 rotations
-        this.next = generateRotation(body);
-        TetrisPiece curr = (TetrisPiece) this.next;
-        while (!curr.equals(this)) {
-            curr.next = generateRotation(curr.next.getBody());
-            curr = (TetrisPiece) curr.next;
-        }
+        Point[] rotated = generateRotation(body);
+        
+        this.next = new TetrisPiece(rotated, this); 
+        
+    }
+    
+    private TetrisPiece(Point[] body, TetrisPiece original) {
+    	this.body = body;
+    	
+    	Point[] rotated = generateRotation(this.body);
+    	if(!original.equals(rotated))
+    		this.next = new TetrisPiece(rotated, original);
+    	else {
+    		this.next = original;
+    	}
     }
 
-    private TetrisPiece generateRotation(Point[] points) {
+    private Point[] generateRotation(Point[] points) {
         // used for determining the piece shape
         Set<Integer> xSet = new HashSet<>();
         Set<Integer> ySet = new HashSet<>();
@@ -37,13 +48,14 @@ public final class TetrisPiece extends Piece {
 
         if (xSet.size() == 2 && ySet.size() == 2) {
             // shape is a square
-            return new TetrisPiece(points);
+            return points;
         }
 
         int size = (xSet.size() == 1 || ySet.size() == 1) ? 4 : 3;
         // we use a 3x3 matrix to do rotation
+        
         Point[] rotated = generatePointArray(rotateMatrix(generatePieceMatrix(body, size), size), size);
-        return new TetrisPiece(rotated);
+        return rotated;
     }
 
     /**
@@ -115,7 +127,7 @@ public final class TetrisPiece extends Piece {
     @Override
     public boolean equals(Object other) {
         if (other instanceof TetrisPiece) {
-            Set<Point> tmp = new HashSet<>();
+            Set<Point> tmp = new HashSet<Point>();
             // since each block is made of 4 and only 4 points, we can check both here
             for (int i = 0; i < body.length; i++) {
                 tmp.add(body[i]);
@@ -123,6 +135,15 @@ public final class TetrisPiece extends Piece {
             }
 
             return tmp.size() == 4;
+        } else if(other instanceof Point[]) {
+        	Set<Point> tmp = new HashSet<Point>();
+    		// since each block is made of 4 and only 4 points, we can check both here
+    		for (int i = 0; i < this.body.length; i++) {
+    			tmp.add(this.body[i]);
+    			tmp.add(((Point[])other)[i]);
+    		}
+
+    		return tmp.size() == 4;
         }
 
        return false;
