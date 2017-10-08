@@ -17,6 +17,7 @@ public final class TetrisPiece extends Piece {
     private int width;
     private int height;
     private int[] skirt;
+    private int x, y;
 
     private TetrisPiece(Point[] body) {
         this.body = body;
@@ -40,7 +41,7 @@ public final class TetrisPiece extends Piece {
 
         skirt = new int[minValues.size()];
         int index = 0;
-        // same here
+        // same thing here
         for (Integer x : minValues.keySet()) {
             int y = minValues.get(x);
 
