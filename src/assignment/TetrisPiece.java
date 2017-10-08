@@ -18,9 +18,9 @@ public final class TetrisPiece extends Piece {
     private int height;
     private int[] skirt;
 
-    //TODO: calculate stuff
     private TetrisPiece(Point[] body) {
         this.body = body;
+        // This stuff should ideally be segregated into another method
         HashMap<Integer, Integer> minValues = new HashMap<>();
         int minWidth = Integer.MAX_VALUE, maxWidth = Integer.MIN_VALUE;
         int minHeight = Integer.MAX_VALUE, maxHeight = Integer.MIN_VALUE;
@@ -40,11 +40,11 @@ public final class TetrisPiece extends Piece {
 
         skirt = new int[minValues.size()];
         int index = 0;
-
+        // same here
         for (Integer x : minValues.keySet()) {
             int y = minValues.get(x);
 
-            skirt[index] = y;
+            skirt[index++] = y;
 
             if (x < minWidth) {
                 minWidth = x;
@@ -169,8 +169,9 @@ public final class TetrisPiece extends Piece {
 
     @Override
     public boolean equals(Object other) {
+        // use a set because we can't be sure of the order points are given to us
         if (other instanceof TetrisPiece) {
-            Set<Point> tmp = new HashSet<Point>();
+            Set<Point> tmp = new HashSet<>();
             // since each block is made of 4 and only 4 points, we can check both here
             for (int i = 0; i < body.length; i++) {
                 tmp.add(body[i]);
@@ -179,7 +180,7 @@ public final class TetrisPiece extends Piece {
 
             return tmp.size() == 4;
         } else if(other instanceof Point[]) {
-        	Set<Point> tmp = new HashSet<Point>();
+        	Set<Point> tmp = new HashSet<>();
     		// since each block is made of 4 and only 4 points, we can check both here
     		for (int i = 0; i < this.body.length; i++) {
     			tmp.add(this.body[i]);

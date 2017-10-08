@@ -123,7 +123,8 @@ public interface Board {
     int getRowsCleared();
 
     /**
-     * Returns the width of the board in blocks.
+     * Returns the width of the
+     * in blocks.
      */
     int getWidth();
 
