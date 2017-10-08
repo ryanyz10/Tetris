@@ -2,6 +2,7 @@ package assignment;
 
 import java.awt.*;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -13,11 +14,53 @@ import java.util.Set;
  */
 public final class TetrisPiece extends Piece {
     private Point[] body;
+    private int width;
+    private int height;
+    private int[] skirt;
 
     //TODO: calculate stuff
     private TetrisPiece(Point[] body) {
         this.body = body;
-        
+        HashMap<Integer, Integer> minValues = new HashMap<>();
+        int minWidth = Integer.MAX_VALUE, maxWidth = Integer.MIN_VALUE;
+        int minHeight = Integer.MAX_VALUE, maxHeight = Integer.MIN_VALUE;
+        for (Point point : body) {
+            if (point.y > maxHeight) {
+                maxHeight = point.y;
+            }
+
+            if (minValues.containsKey(point.x)) {
+                if (minValues.get(point.x) > point.y) {
+                    minValues.put(point.x, point.y);
+                }
+            } else {
+                minValues.put(point.x, point.y);
+            }
+        }
+
+        skirt = new int[minValues.size()];
+        int index = 0;
+
+        for (Integer x : minValues.keySet()) {
+            int y = minValues.get(x);
+
+            skirt[index] = y;
+
+            if (x < minWidth) {
+                minWidth = x;
+            }
+
+            if (x > maxWidth) {
+                maxWidth = x;
+            }
+
+            if (y < minWidth) {
+                minHeight = y;
+            }
+        }
+
+        width = maxWidth - minWidth;
+        height = maxHeight - minHeight;
         // line, square or other
         // there will always be 4 rotations
         Point[] rotated = generateRotation(body);
@@ -113,16 +156,16 @@ public final class TetrisPiece extends Piece {
     }
 
     @Override
-    public int getWidth() { return -1; }
+    public int getWidth() { return width; }
 
     @Override
-    public int getHeight() { return -1; }
+    public int getHeight() { return height; }
 
     @Override
     public Point[] getBody() { return body; }
 
     @Override
-    public int[] getSkirt() { return null; }
+    public int[] getSkirt() { return skirt; }
 
     @Override
     public boolean equals(Object other) {
