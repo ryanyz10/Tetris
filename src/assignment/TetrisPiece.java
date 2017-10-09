@@ -72,6 +72,47 @@ public final class TetrisPiece extends Piece {
     
     private TetrisPiece(Point[] body, TetrisPiece original) {
     	this.body = body;
+
+        HashMap<Integer, Integer> minValues = new HashMap<>();
+        int minWidth = Integer.MAX_VALUE, maxWidth = Integer.MIN_VALUE;
+        int minHeight = Integer.MAX_VALUE, maxHeight = Integer.MIN_VALUE;
+        for (Point point : body) {
+            if (point.y > maxHeight) {
+                maxHeight = point.y;
+            }
+
+            if (minValues.containsKey(point.x)) {
+                if (minValues.get(point.x) > point.y) {
+                    minValues.put(point.x, point.y);
+                }
+            } else {
+                minValues.put(point.x, point.y);
+            }
+        }
+
+        skirt = new int[minValues.size()];
+        int index = 0;
+        // same thing here
+        for (Integer x : minValues.keySet()) {
+            int y = minValues.get(x);
+
+            skirt[index++] = y;
+
+            if (x < minWidth) {
+                minWidth = x;
+            }
+
+            if (x > maxWidth) {
+                maxWidth = x;
+            }
+
+            if (y < minWidth) {
+                minHeight = y;
+            }
+        }
+
+        width = maxWidth - minWidth;
+        height = maxHeight - minHeight;
     	
     	Point[] rotated = generateRotation(this.body);
     	if(!original.equals(rotated))
