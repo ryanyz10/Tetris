@@ -1,7 +1,6 @@
 package assignment;
 
 import java.awt.*;
-import java.util.Arrays;
 
 /**
  * Represents a Tetris board -- essentially a 2-d grid of booleans. Supports
@@ -13,7 +12,7 @@ public final class TetrisBoard implements Board {
     private Action lastAction;
     private Result lastResult;
     private int rowsCleared;
-    private Piece nextPiece;
+    private TetrisPiece nextPiece;
     private int height, width;
     private int[] heights;
     private int[] widths;
@@ -33,16 +32,27 @@ public final class TetrisBoard implements Board {
         if (nextPiece == null) {
             lastResult = Result.NO_PIECE;
         } else {
-            Point[] body = nextPiece.getBody();
             switch (act) {
                 case NOTHING:
                     lastResult = Result.SUCCESS;
                     break;
                 case LEFT:
+                    lastResult = Result.SUCCESS;
+                    togglePiece(nextPiece);
+                    nextPiece.setX(nextPiece.getX() - 1);
+                    togglePiece(nextPiece);
                     break;
                 case RIGHT:
+                    lastResult = Result.SUCCESS;
+                    togglePiece(nextPiece);
+                    nextPiece.setX(nextPiece.getX() + 1);
+                    togglePiece(nextPiece);
                     break;
                 case DOWN:
+                    lastResult = Result.SUCCESS;
+                    togglePiece(nextPiece);
+                    nextPiece.setY(nextPiece.getY() - 1);
+                    togglePiece(nextPiece);
                     break;
                 case DROP:
                     break;
@@ -58,6 +68,13 @@ public final class TetrisBoard implements Board {
         return lastResult;
     }
 
+    // add the current piece to the board
+    private void togglePiece(TetrisPiece p) {
+        for (Point point : p.getBody()) {
+            board[point.x + p.getX()][height - p.getY() - point.y + 1] = !board[point.x + p.getX()][height - p.getY() - point.y + 1];
+        }
+    }
+
     @Override
     public Board testMove(Action act) {
         return null;
@@ -65,7 +82,9 @@ public final class TetrisBoard implements Board {
 
     @Override
     public void nextPiece(Piece p) {
-        nextPiece = p;
+        nextPiece = (TetrisPiece) p;
+        nextPiece.setPosition(width / 2, height);
+        togglePiece(nextPiece);
     }
 
     @Override

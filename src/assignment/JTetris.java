@@ -33,7 +33,7 @@ public class JTetris extends JComponent {
      * install the controls in the WEST.
      */
     public static void createGUI(JTetris tetris) {
-        JFrame frame = new JFrame("Tetris 2015");
+        JFrame frame = new JFrame("Tetris 2017");
         JComponent container = (JComponent)frame.getContentPane();
         container.setLayout(new BorderLayout());
 
