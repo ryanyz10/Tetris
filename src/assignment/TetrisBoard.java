@@ -1,6 +1,10 @@
 package assignment;
 
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Represents a Tetris board -- essentially a 2-d grid of booleans. Supports
@@ -17,6 +21,7 @@ public final class TetrisBoard implements Board {
     private int height, width;
     private int[] heights; // height of pieces in each column
     private int[] widths; // number of filled columns in each row
+    private int pieceState;
 
     // JTetris will use this constructor
     public TetrisBoard(int width, int height) {
@@ -25,6 +30,7 @@ public final class TetrisBoard implements Board {
         board = new boolean[height][width];
         heights = new int[width];
         widths = new int[height];
+        pieceState = -1;
     }
 
     @Override
@@ -84,20 +90,30 @@ public final class TetrisBoard implements Board {
                 case CLOCKWISE: {
                         // TODO: wallkicks
                         togglePiece(nextPiece);
-                        nextPiece = clockwise(nextPiece);
+                        int nextState = (pieceState+1) % 4;
+                        TetrisPiece tempPiece = wallKick(clockwise(nextPiece), nextState);
+                        if(tempPiece != null) {
+                        	nextPiece = tempPiece;
+                        	pieceState = nextState;
+                        }
                         togglePiece(nextPiece);
                         break;
                     }
                 case COUNTERCLOCKWISE: {
                         togglePiece(nextPiece);
-                        nextPiece = (TetrisPiece) nextPiece.nextRotation();
+                        int nextState = (pieceState-1) < 0 ? 3:pieceState-1;
+                        TetrisPiece tempPiece = wallKick((TetrisPiece) nextPiece.nextRotation(), nextState);
+                        if(tempPiece != null) {
+                        	nextPiece = tempPiece;
+                        	pieceState = nextState;
+                        }
+                        
                         togglePiece(nextPiece);
                         break;
                     }
                 case HOLD:
                     break;
             }
-
             if (lastResult == Result.PLACE) {
                 updateHeights();
                 updateWidths();
@@ -216,6 +232,81 @@ public final class TetrisBoard implements Board {
     private TetrisPiece clockwise(TetrisPiece p) {
         return (TetrisPiece) p.nextRotation().nextRotation().nextRotation();
     }
+    
+    /**
+     * Wall Kick main function
+     * @param p The rotated piece
+     * @param newState The state of the rotated piece
+     * @return If there is a possible position, x and y will be updated and the rotated piece will be returned.
+     * Otherwise a null piece signifying no rotation is returned
+     */
+    private TetrisPiece wallKick(TetrisPiece p, int newState) {
+    	int[] tests = new int[10];
+    	
+    	//Determine if negative multiplier needs to be applied
+    	boolean changeSign = (pieceState > newState && !(pieceState==3 && newState==0))
+    													|| (pieceState == 0 && newState == 3);
+    	
+    	//Get the correct set of possible locations
+    	if(p.getPieceType() == 2) {
+    		return p;
+    	} else if(p.getPieceType() == 1) {
+    		switch(pieceState+"&"+newState) {
+    		case "0&1":
+    		case "1&0": 
+    			tests = new int[] {0,0,-2,0,1,0,-2,-1,1,2};
+    			break;
+    		case "1&2":
+    		case "2&1": 
+    			tests = new int[] {0,0,-1,0,2,0,-1,2,2,-1};
+    			break;  		
+    		case "2&3":
+    		case "3&2": 
+    			tests = new int[] {0,0,2,0,-1,0,2,1,-1,-2};
+    			break;
+    		case "3&0":
+    		case "0&3": 
+    			tests = new int[] {0,0,1,0,-2,0,1,-2,-2,1};
+    			break;
+    		}
+    	} else {
+    		switch(pieceState+"&"+newState) {
+    		case "0&1":
+    		case "1&0": 
+    			tests = new int[] {0,0,-1,0,-1,1,0,-2,-1,-2};
+    			break;
+    		case "1&2":
+    		case "2&1": 
+    			tests = new int[] {0,0,1,0,1,-1,0,2,1,2};
+    			break;  		
+    		case "2&3":
+    		case "3&2": 
+    			tests = new int[] {0,0,1,0,1,1,0,-2,1,-2};
+    			break;
+    		case "3&0":
+    		case "0&3": 
+    			tests = new int[] {0,0,-1,0,-1,-1,0,2,-1,2};
+    			break;
+    		}
+    	}
+    	
+    	//Check all cases
+    	tests_label:
+    	for(int testCase = 0; testCase+1 < tests.length; testCase+=2) {
+    		for(Point po: p.getBody()) {
+    			int newX = (int) (po.getX() + this.pieceX + (changeSign?-1:1) * tests[testCase]);
+        		int newY = (int) (po.getY() + this.pieceY + (changeSign?-1:1) * tests[testCase+1]);
+    			if((newX < 0 || newX >= width) || (yToRow(newY)<0 || yToRow(newY) >= height) || board[yToRow(newY)][newX])
+    				continue tests_label;
+    		}
+    		
+    		this.pieceX = this.pieceX + (changeSign?-1:1) * tests[testCase];
+    		this.pieceY = this.pieceY + (changeSign?-1:1) * tests[testCase+1];
+    		return p;
+    	}
+    	
+    	return null;
+    }
 
     /**
      * checks if piece can move left 1 unit
@@ -315,6 +406,7 @@ public final class TetrisBoard implements Board {
         nextPiece = (TetrisPiece) p;
         pieceX = (width - nextPiece.getWidth()) / 2;
         pieceY = height - JTetris.TOP_SPACE;
+        pieceState = 2;
         togglePiece(nextPiece);
     }
 

@@ -17,6 +17,7 @@ public final class TetrisPiece extends Piece {
     private int width;
     private int height;
     private int[] skirt;
+    private int pieceType;
 
     private TetrisPiece(Point[] body) {
         this.body = body;
@@ -61,19 +62,44 @@ public final class TetrisPiece extends Piece {
 
         width = maxWidth - minWidth + 1;
         height = maxHeight - minHeight + 1;
+
+        
+        //Determine piece type
+        //Only needs to be done once per piece
+        Set<Integer> xSet = new HashSet<>();
+        Set<Integer> ySet = new HashSet<>();
+        for (Point point : body) {
+            xSet.add(point.x);
+            ySet.add(point.y);
+        }
+        if (xSet.size() == 2 && ySet.size() == 2) {
+        	pieceType = 2; //Piece is SQUARE
+        } else if((xSet.size() == 1 || ySet.size() == 1)) {
+        	pieceType = 1; // Piece is I
+        } else {
+        	pieceType = 0; //Piece is OTHER
+        }
+       
+        //Correct "I" Input
+        if(pieceType == 1) {
+        	Point[] newBody = new Point[4];
+        	for(int pointI = 0; pointI<4; pointI++) {
+        		newBody[pointI] = new Point();
+        		newBody[pointI].setLocation(body[pointI].getX(), body[pointI].getY() + 1);
+        	}
+        	this.body = newBody;
+        }
         // line, square or other
         // there will always be 4 rotations
         Point[] rotated = generateRotation(body);
-        
         this.next = new TetrisPiece(rotated, this); 
-        
     }
 
     // separate constructor for creating rotations
     // using the original constructor caused an infinite recursion
     private TetrisPiece(Point[] body, TetrisPiece original) {
     	this.body = body;
-
+    	this.pieceType = original.getPieceType();
         HashMap<Integer, Integer> minValues = new HashMap<>();
         int minWidth = Integer.MAX_VALUE, maxWidth = Integer.MIN_VALUE;
         int minHeight = Integer.MAX_VALUE, maxHeight = Integer.MIN_VALUE;
@@ -129,22 +155,14 @@ public final class TetrisPiece extends Piece {
      * @return a Point array representing the rotated TetrisPiece
      */
     private Point[] generateRotation(Point[] points) {
-        // used for determining the piece shape
-        Set<Integer> xSet = new HashSet<>();
-        Set<Integer> ySet = new HashSet<>();
-        for (Point point : points) {
-            xSet.add(point.x);
-            ySet.add(point.y);
-        }
+        // Determine piece characteristics
+    	int size = -1;
+    	switch(this.pieceType) {
+    		case 2: return points;
+    		case 1: size = 4; break;
+    		case 0: size = 3; break;
+    	}
 
-        if (xSet.size() == 2 && ySet.size() == 2) {
-            // shape is a square
-            return points;
-        }
-
-        int size = (xSet.size() == 1 || ySet.size() == 1) ? 4 : 3;
-        // we use a 3x3 matrix to do rotation
-        
         Point[] rotated = generatePointArray(rotateMatrix(generatePieceMatrix(body, size), size), size);
         return rotated;
     }
@@ -214,6 +232,8 @@ public final class TetrisPiece extends Piece {
 
     @Override
     public int[] getSkirt() { return skirt; }
+    
+    public int getPieceType() { return pieceType; }
 
     @Override
     public boolean equals(Object other) {
