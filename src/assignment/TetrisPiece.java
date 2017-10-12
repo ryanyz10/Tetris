@@ -17,7 +17,6 @@ public final class TetrisPiece extends Piece {
     private int width;
     private int height;
     private int[] skirt;
-    private int x, y;
 
     private TetrisPiece(Point[] body) {
         this.body = body;
@@ -55,13 +54,13 @@ public final class TetrisPiece extends Piece {
                 maxWidth = x;
             }
 
-            if (y < minWidth) {
+            if (y < minHeight) {
                 minHeight = y;
             }
         }
 
-        width = maxWidth - minWidth;
-        height = maxHeight - minHeight;
+        width = maxWidth - minWidth + 1;
+        height = maxHeight - minHeight + 1;
         // line, square or other
         // there will always be 4 rotations
         Point[] rotated = generateRotation(body);
@@ -69,7 +68,9 @@ public final class TetrisPiece extends Piece {
         this.next = new TetrisPiece(rotated, this); 
         
     }
-    
+
+    // separate constructor for creating rotations
+    // using the original constructor caused an infinite recursion
     private TetrisPiece(Point[] body, TetrisPiece original) {
     	this.body = body;
 
@@ -122,6 +123,11 @@ public final class TetrisPiece extends Piece {
     	}
     }
 
+    /**
+     * creates the next rotation of a given TetrisPiece
+     * @param points a point array representing a TetrisPiece
+     * @return a Point array representing the rotated TetrisPiece
+     */
     private Point[] generateRotation(Point[] points) {
         // used for determining the piece shape
         Set<Integer> xSet = new HashSet<>();
@@ -233,26 +239,5 @@ public final class TetrisPiece extends Piece {
         }
 
        return false;
-    }
-
-    public void setPosition(int x, int y) {
-        this.x = x;
-        this.y = y;
-    }
-
-    public void setX(int x) {
-        this.x = x;
-    }
-
-    public void setY(int y) {
-        this.y = y;
-    }
-
-    public int getX() {
-        return x;
-    }
-
-    public int getY() {
-        return y;
     }
 }

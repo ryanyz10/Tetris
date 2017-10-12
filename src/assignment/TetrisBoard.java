@@ -13,6 +13,7 @@ public final class TetrisBoard implements Board {
     private Result lastResult;
     private int rowsCleared;
     private TetrisPiece nextPiece;
+    private int pieceX, pieceY;
     private int height, width;
     private int[] heights; // height of pieces in each column
     private int[] widths; // number of filled columns in each row
@@ -38,8 +39,8 @@ public final class TetrisBoard implements Board {
                     break;
                 case LEFT:
                     togglePiece(nextPiece);
-                    if (isValidMove(nextPiece, -1, 0)) {
-                        nextPiece.setX(nextPiece.getX() - 1);
+                    if (canMoveLeft()) {
+                        pieceX -= 1;
                         togglePiece(nextPiece);
                         lastResult = Result.SUCCESS;
                     } else {
@@ -49,8 +50,8 @@ public final class TetrisBoard implements Board {
                     break;
                 case RIGHT:
                     togglePiece(nextPiece);
-                    if (isValidMove(nextPiece, 1, 0)) {
-                        nextPiece.setX(nextPiece.getX() + 1);
+                    if (canMoveRight()) {
+                        pieceX += 1;
                         togglePiece(nextPiece);
                         lastResult = Result.SUCCESS;
                     } else {
@@ -60,93 +61,127 @@ public final class TetrisBoard implements Board {
                     break;
                 case DOWN:
                     togglePiece(nextPiece);
-                    if (isValidMove(nextPiece, 0, -1)) {
-                        nextPiece.setY(nextPiece.getY() - 1);
+                    if (canMoveDown(1)) {
+                        pieceY -= 1;
                         togglePiece(nextPiece);
                         lastResult = Result.SUCCESS;
                     } else {
                         togglePiece(nextPiece);
-                        nextPiece = null;
-                        lastResult = Result.OUT_BOUNDS;
-                        updateHeights(heights);
-                        updateWidths(widths);
-                        clearRows();
+                        lastResult = Result.PLACE;
                     }
                     break;
                 case DROP: {
                         togglePiece(nextPiece);
-                        int[] skirt = nextPiece.getSkirt();
-                        int x = nextPiece.getX();
-                        int y = nextPiece.getY();
-
-                        int minHeight = JTetris.HEIGHT + JTetris.TOP_SPACE;
-                        for (int i = 0; i < skirt.length; i++) {
-                            int currHeight = y + skirt[i] - heights[x + i];
-                            minHeight = Math.min(currHeight, minHeight);
+                        int maxDropHeight = getMaxDropHeight();
+                        if (canMoveDown(maxDropHeight)) {
+                            pieceY -= maxDropHeight;
                         }
 
-                        nextPiece.setY(y - minHeight);
                         togglePiece(nextPiece);
-                        updateWidths(widths);
-                        updateHeights(heights);
-                        lastResult = Result.SUCCESS;
-                        nextPiece = null;
-                        clearRows();
+                        lastResult = Result.PLACE;
                         break;
                     }
                 case CLOCKWISE: {
-                        int x = nextPiece.getX();
-                        int y = nextPiece.getY();
+                        // TODO: wallkicks
                         togglePiece(nextPiece);
                         nextPiece = clockwise(nextPiece);
-                        nextPiece.setPosition(x, y);
                         togglePiece(nextPiece);
                         break;
                     }
                 case COUNTERCLOCKWISE: {
-                        int x = nextPiece.getX();
-                        int y = nextPiece.getY();
                         togglePiece(nextPiece);
                         nextPiece = (TetrisPiece) nextPiece.nextRotation();
-                        nextPiece.setPosition(x, y);
                         togglePiece(nextPiece);
                         break;
                     }
                 case HOLD:
                     break;
             }
+
+            if (lastResult == Result.PLACE) {
+                updateHeights();
+                updateWidths();
+                clearRows();
+            }
         }
 
         return lastResult;
     }
 
+    @Override
+    public Board testMove(Action act) {
+        Board testBoard = copyBoard();
+        testBoard.move(act);
+        return testBoard;
+    }
+
+    /**
+     * creates a copy of the current board for testMove
+     * @return a Board object that is a copy of the current Board
+     */
+    private Board copyBoard() {
+        Board clone = new TetrisBoard(width, height);
+        ((TetrisBoard) clone).board = copyBooleanMatrix();
+        ((TetrisBoard) clone).updateHeights();
+        ((TetrisBoard) clone).updateWidths();
+        ((TetrisBoard) clone).nextPiece = nextPiece;
+        ((TetrisBoard) clone).pieceX = pieceX;
+        ((TetrisBoard) clone).pieceY = pieceY;
+        return clone;
+    }
+
+    /**
+     * creates a copy of the current board matrix
+     * needed because otherwise it will be passed by reference
+     * @return copy of the board matrix in the current Board
+     */
+    private boolean[][] copyBooleanMatrix() {
+        boolean[][] clone = new boolean[height][width];
+        for (int i = 0; i < height; i++) {
+            for (int j = 0; j < width; j++) {
+                clone[i][j] = board[i][j];
+            }
+        }
+
+        return clone;
+    }
+
+    /**
+     * checks if board has any complete rows and if so, removes those rows
+     */
     private void clearRows() {
         int rowsCleared = 0;
         for (int i = 0; i < widths.length;) {
             if (widths[i] == width) {
                 // this row is full
                 rowsCleared++;
-                shiftBoard(board, i);
-                updateWidths(widths);
+                shiftBoard(i);
+                updateWidths();
             } else {
                 i++;
             }
         }
 
-        updateHeights(heights);
+        updateHeights();
         this.rowsCleared = rowsCleared;
     }
 
-    // row is the one being cleared
-    private void shiftBoard(boolean[][] board, int row) {
+    /**
+     * clears a row and shifts the other rows to fill in the missing row
+     * @param row row to be cleared
+     */
+    private void shiftBoard(int row) {
         for (int i = row - 1; i >= 0; i--) {
-            board[i] = board[i + 1];
+            board[i + 1] = board[i];
         }
 
-        board[height - 1] = new boolean[width];
+        board[0] = new boolean[width];
     }
 
-    private void updateHeights(int[] heights) {
+    /**
+     * updates the heights array after placing piece
+     */
+    private void updateHeights() {
         for (int c = 0; c < width; c++) {
             int row = 0;
             while (row < height && !board[row][c]) {
@@ -157,7 +192,10 @@ public final class TetrisBoard implements Board {
         }
     }
 
-    private void updateWidths(int[] widths) {
+    /**
+     * updates the widths array after placing a piece
+     */
+    private void updateWidths() {
         for (int r = 0; r < height; r++) {
             int count = 0;
             for (int c = 0; c < width; c++) {
@@ -170,48 +208,113 @@ public final class TetrisBoard implements Board {
         }
     }
 
+    /**
+     * helper method to get a clockwise rotation without ugly code
+     * @param p TetrisPiece being rotated
+     * @return TetrisPiece p after clockwise rotation
+     */
     private TetrisPiece clockwise(TetrisPiece p) {
         return (TetrisPiece) p.nextRotation().nextRotation().nextRotation();
     }
 
-    private boolean isValidMove(TetrisPiece p, int dx, int dy) {
-        for (Point point : p.getBody()) {
-            int r = height - (p.getY() + dy + point.y) - 1;
-            int c = point.x + p.getX() + dx;
-
-            if (r < 0 || r >= height || c < 0 || c >= width) {
-                // System.out.println("Out of bounds");
-                return false;
-            }
-
-            if (board[r][c]) {
-                // System.out.println("Occupied");
+    /**
+     * checks if piece can move left 1 unit
+     * @return true if nextPiece can move left, false otherwise
+     */
+    private boolean canMoveLeft() {
+        for (Point point : nextPiece.getBody()) {
+            int newX = point.x + pieceX - 1;
+            if (newX < 0 || board[yToRow(pieceY)][newX]) {
                 return false;
             }
         }
 
-        // System.out.println("Space is free");
         return true;
     }
 
-    // add the current piece to the board
+    /**
+     * checks if a piece can move right 1 unit
+     * @return true if p can move right, false otherwise
+     */
+    private boolean canMoveRight() {
+        for (Point point : nextPiece.getBody()) {
+            int newX = point.x + pieceX + 1;
+            if (newX >= width || board[yToRow(pieceY)][newX]) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * checks if nextPiece can be moved down in the board
+     * @param distance the distance to move down
+     * @return true if nextPiece can be moved down length of distance, false otherwise
+     */
+    private boolean canMoveDown(int distance) {
+        for (Point point : nextPiece.getBody()) {
+            int newY = pieceY + point.y - distance;
+            int row = yToRow(newY);
+            if (row < 0 || row >= height || board[row][pieceX + point.x]) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * gets the maximum distance the piece can fall in the board
+     * this method used to use the skirt, however, because of how we do rotations, that led to IndexOutOfBounds
+     * when the piece was rotated and moved against the left wall
+     * @return value representing max distance the piece can fall
+     */
+    private int getMaxDropHeight() {
+        int minDrop = JTetris.HEIGHT + JTetris.TOP_SPACE;
+        for (Point point : nextPiece.getBody()) {
+            int currDrop = pieceY + point.y - heights[pieceX + point.x];
+            minDrop = Math.min(currDrop, minDrop);
+        }
+
+        return minDrop;
+    }
+
+    // the following two methods convert from y position to row number and vice versa
+    // the math is the same, but for the sake of readability I created 2 methods
+    private int yToRow(int y) {
+        return height - 1 - y;
+    }
+
+    private int rowToY(int r) {
+        return height - 1 - r;
+    }
+
+    /**
+     * toggle a piece in the board for moving
+     * @param p the piece being moved
+     */
     private void togglePiece(TetrisPiece p) {
         for (Point point : p.getBody()) {
-            int r = height - (p.getY() + point.y) - 1;
-            int c = point.x + p.getX();
+            int r = yToRow(pieceY + point.y);
+            int c = point.x + pieceX;
             board[r][c] = !board[r][c];
         }
     }
 
-    @Override
-    public Board testMove(Action act) {
-        return null;
+    protected int[] getHeights() {
+        return heights;
+    }
+
+    protected int[] getWidths() {
+        return widths;
     }
 
     @Override
     public void nextPiece(Piece p) {
         nextPiece = (TetrisPiece) p;
-        nextPiece.setPosition((width - nextPiece.getWidth()) / 2, height - JTetris.TOP_SPACE);
+        pieceX = (width - nextPiece.getWidth()) / 2;
+        pieceY = height - JTetris.TOP_SPACE;
         togglePiece(nextPiece);
     }
 
@@ -268,6 +371,7 @@ public final class TetrisBoard implements Board {
         return maxHeight;
     }
 
+    // TODO implement method
     @Override
     public int dropHeight(Piece piece, int x) {
         return -1;
@@ -280,16 +384,17 @@ public final class TetrisBoard implements Board {
 
     @Override
     public int getRowWidth(int y) {
-        return widths[height - y - 1];
+        return widths[yToRow(y)];
     }
 
     @Override
     public boolean getGrid(int x, int y) {
+        // if position is out of bounds
         if (x < 0 || x > width || y < 0 || y > height) {
             return true;
         }
 
-        return board[height - y - 1][x];
+        return board[yToRow(y)][x];
     }
 
 }
