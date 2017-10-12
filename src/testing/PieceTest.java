@@ -16,15 +16,47 @@ import assignment.TetrisPiece;
 public class PieceTest implements PieceConstants {
 	
 	@Test
-	public void iShapeTest() {
-		Piece iPiece = TetrisPiece.getPiece(PieceConstants.iShape);
-		iPiece.nextRotation();
+	public void iShapeRotationTest() {
+		Piece block = TetrisPiece.getPiece("0 0  1 0  2 0  3 0");
+
+		//90 Degrees
+		block = block.nextRotation();
+		Point[] blockBody = block.getBody();
+		Point[] correctBody = this.parsePoints(PieceConstants.iShape90);
 		
-		fail("Line implementation is incorrect");
+		assertTrue(this.pointEquals(blockBody, correctBody));
+		
+		//180 Degrees
+		block = block.nextRotation();
+		blockBody = block.getBody();
+		correctBody = this.parsePoints(PieceConstants.iShape180);
+		
+		assertTrue(this.pointEquals(blockBody, correctBody));
+		
+		//270 Degrees
+		block = block.nextRotation();
+		blockBody = block.getBody();
+		correctBody = this.parsePoints(PieceConstants.iShape270);
+		
+		assertTrue(this.pointEquals(blockBody, correctBody));
+		
+		//360 Degrees
+		block = block.nextRotation();
+		blockBody = block.getBody();
+		correctBody = this.parsePoints(PieceConstants.iShape);
+		
+		assertTrue(this.pointEquals(blockBody, correctBody));
+		
+		//Make sure the rotation wraps
+		//90 Degrees
+		block = block.nextRotation();
+		blockBody = block.getBody();
+		correctBody = this.parsePoints(PieceConstants.iShape90);
+		assertTrue(this.pointEquals(blockBody, correctBody));
 	}
 	
 	@Test
-	public void rightLShapeTest() {
+	public void rightLShapeRotationTest() {
 		Piece rlPiece = TetrisPiece.getPiece(PieceConstants.rightLShape);
 
 		//90 Degrees
@@ -64,7 +96,7 @@ public class PieceTest implements PieceConstants {
 	}
 	
 	@Test
-	public void leftLShapeTest() {
+	public void leftLShapeRotationTest() {
 		Piece llPiece = TetrisPiece.getPiece(PieceConstants.leftLShape);
 
 		//90 Degrees
@@ -104,7 +136,7 @@ public class PieceTest implements PieceConstants {
 	}
 	
 	@Test
-	public void rightZShapeTest() {
+	public void rightZShapeRotationTest() {
 		Piece block = TetrisPiece.getPiece(PieceConstants.rightZShape);
 
 		//90 Degrees
@@ -144,7 +176,7 @@ public class PieceTest implements PieceConstants {
 	}
 	
 	@Test
-	public void leftZShapeTest() {
+	public void leftZShapeRotationTest() {
 		Piece block = TetrisPiece.getPiece(PieceConstants.leftZShape);
 
 		//90 Degrees
@@ -184,7 +216,7 @@ public class PieceTest implements PieceConstants {
 	}
 	
 	@Test
-	public void squareShapeTest() {
+	public void squareShapeRotationTest() {
 		Piece block = TetrisPiece.getPiece(PieceConstants.squareShape);
 
 		//Should always be itself
@@ -196,7 +228,7 @@ public class PieceTest implements PieceConstants {
 	}
 	
 	@Test
-	public void tShapeTest() {
+	public void tShapeRotationTest() {
 		Piece block = TetrisPiece.getPiece(PieceConstants.tShape);
 
 		//90 Degrees

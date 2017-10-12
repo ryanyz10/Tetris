@@ -5,10 +5,10 @@ public interface PieceConstants {
 	/*
 	 * Not perfect, implementation in progress
 	 */
-	String iShape 			= "0 0  1 0  2 0  3 0";
-	String iShape90 		= "0 0  1 0  2 0  3 0";
-	String iShape180 		= "0 0  1 0  2 0  3 0";
-	String iShape270 		= "0 0  1 0  2 0  3 0";
+	String iShape 			= "0 1  1 1  2 1  3 1";
+	String iShape90 		= "2 0  2 1  2 2  2 3";
+	String iShape180 		= "0 2  1 2  2 2  3 2";
+	String iShape270 		= "1 0  1 1  1 2  1 3";
 	
 	
 	//Right L Rotating
