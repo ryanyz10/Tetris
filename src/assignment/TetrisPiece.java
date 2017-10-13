@@ -63,7 +63,7 @@ public final class TetrisPiece extends Piece {
         width = maxWidth - minWidth + 1;
         height = maxHeight - minHeight + 1;
 
-        
+
         //Determine piece type
         //Only needs to be done once per piece
         Set<Integer> xSet = new HashSet<>();
@@ -79,7 +79,7 @@ public final class TetrisPiece extends Piece {
         } else {
         	pieceType = 0; //Piece is OTHER
         }
-       
+
         //Correct "I" Input
         if(pieceType == 1) {
         	Point[] newBody = new Point[4];
@@ -141,7 +141,7 @@ public final class TetrisPiece extends Piece {
 
         width = maxWidth - minWidth;
         height = maxHeight - minHeight;
-        
+
         // Correct Original Body for API
         if(pieceType == 1) {
         	Point[] apiFix = new Point[4];
@@ -153,7 +153,7 @@ public final class TetrisPiece extends Piece {
         			apiFix[ind] = temp;
         		}
         	}
-        	
+
         	//Vertical Fix
         	if(height == 3) {
         		for(int ind = 0; ind<4; ind++) {
@@ -161,16 +161,16 @@ public final class TetrisPiece extends Piece {
         			Point temp = new Point();
         			temp.setLocation(body[ind].getX()-1, body[ind].getY());
         			apiFix[ind] = temp;
-        			
+
         			//Correct GameBody
         			this.gameBody[ind].x -= 1;
         		}
         	}
-        	
+
         	this.body = apiFix;
-        	
+
         }
-    	
+
     	Point[] rotated = generateRotation(this.gameBody);
     	if(!original.equals(rotated)) {
     		this.next = new TetrisPiece(rotated, original);
@@ -262,11 +262,11 @@ public final class TetrisPiece extends Piece {
 
     @Override
     public int[] getSkirt() { return skirt; }
-    
+
     public int getPieceType() { return pieceType; }
-    
+
     public Point[] getGameBody() { return gameBody; }
-    
+
     @Override
     public boolean equals(Object other) {
         // use a set because we can't be sure of the order points are given to us

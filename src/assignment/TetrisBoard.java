@@ -11,7 +11,7 @@ import java.util.Set;
  * tetris pieces and row clearing.  Does not do any drawing or have any idea of
  * pixels. Instead, just represents the abstract 2-d board.
  */
-public final class TetrisBoard implements Board {
+public class TetrisBoard implements Board {
     private boolean[][] board;
     private Action lastAction;
     private Result lastResult;
@@ -38,6 +38,7 @@ public final class TetrisBoard implements Board {
 
     @Override
     public Result move(Action act) {
+        rowsCleared = 0;
         lastAction = act;
         if (nextPiece == null) {
             lastResult = Result.NO_PIECE;
@@ -430,7 +431,7 @@ public final class TetrisBoard implements Board {
     public void nextPiece(Piece p) {
         nextPiece = (TetrisPiece) p;
         pieceX = (width - nextPiece.getWidth()) / 2;
-        pieceY = height - JTetris.TOP_SPACE;
+        pieceY = height - nextPiece.getHeight() - 1;
         pieceState = 2;
         togglePiece(nextPiece);
     }

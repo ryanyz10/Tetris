@@ -174,6 +174,14 @@ public class JTetris extends JComponent {
         WHEN_IN_FOCUSED_WINDOW
         );
 
+        // HOLD
+        // DROP
+        registerKeyboardAction( new ActionListener() {
+            public void actionPerformed(ActionEvent e) { tick(Board.Action.HOLD); }
+        }, "hold", KeyStroke.getKeyStroke('c'),
+        WHEN_IN_FOCUSED_WINDOW
+        );
+
         // Create the Timer object and have it send
         // tick(DOWN) periodically
         timer = new javax.swing.Timer(DELAY, new ActionListener() {

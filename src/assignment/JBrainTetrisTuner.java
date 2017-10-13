@@ -8,22 +8,21 @@ import java.util.Collections;
 import java.util.HashSet;
 
 public class JBrainTetrisTuner {
-    /* Population size = 100
-     * Rounds per candidate = 5
-     * Max moves per round = 200
-     * Theoretical fitness limit = 5 * 200 * 4 / 10 = 400
-     */
-    private final int POPULATION_SIZE = 1000;
+    private final int POPULATION_SIZE = 100;
     private final int NEW_POPULATION_PERCENT = 30;
-    private final int MAX_MOVES = 500;
-    private final int MAX_GAMES = 100;
-    private WeightsVector[] originalPopulation = new WeightsVector[POPULATION_SIZE];
-    private WeightsVector[] newPopulation = new WeightsVector[(int)(POPULATION_SIZE * NEW_POPULATION_PERCENT / 100.0)];
+    private final int MAX_MOVES = 200;
+    private final int MAX_GAMES = 5;
+    private Vector[] originalPopulation = new Vector[POPULATION_SIZE];
+    private Vector[] newPopulation = new Vector[(int)(POPULATION_SIZE * NEW_POPULATION_PERCENT / 100.0)];
 
 
     public JBrainTetrisTuner() {
         for (int i = 0; i < originalPopulation.length; i++) {
-            WeightsVector vector = new WeightsVector(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5);
+            Vector vector = new Vector(4);
+            for (int j = 0; j < vector.numComponents; j++) {
+                vector.components[j] = Math.random() - 0.5;
+            }
+
             vector.unitize();
             originalPopulation[i] = vector;
         }
@@ -38,8 +37,7 @@ public class JBrainTetrisTuner {
         int generation = 0;
         while (true) {
             for (int i = 0; i < newPopulation.length; i++) {
-                int[] parentIndexes = tournamentSelection(10);
-                WeightsVector child = crossover(originalPopulation[parentIndexes[0]], originalPopulation[parentIndexes[1]]);
+                Vector child = tournamentSelection(10);
                 int mutate = (int)(Math.random() * 100) + 1;
                 if (mutate <= 5) {
                     mutate(child);
@@ -53,18 +51,19 @@ public class JBrainTetrisTuner {
             System.out.println("Darwin");
             survivalOfTheFittest();
             System.out.println("End darwin");
-            Arrays.sort(originalPopulation, Collections.reverseOrder());
+            Arrays.sort(originalPopulation);
+            Vector fittest = originalPopulation[0];
             int totalFitness = 0;
             for (int i = 0; i < originalPopulation.length; i++) {
                 totalFitness += originalPopulation[i].fitness;
             }
 
-            System.out.printf("Average: %f", (double)(totalFitness)/POPULATION_SIZE);
-
+            System.out.printf("Average: %f\n", (double)(totalFitness)/POPULATION_SIZE);
+            System.out.printf("Fittest in generation %d: <%f,%f,%f,%f> with fitness %d\n", generation, fittest.components[0], fittest.components[1], fittest.components[2], fittest.components[3], fittest.fitness);
             try {
                 PrintWriter out = new PrintWriter(new File(weightsFile));
-                WeightsVector fittest = originalPopulation[0];
-                out.print("Fittest in generation " + generation + ": " + fittest.aggHeightWeight + " " + fittest.rowsCompWeight + " " + fittest.numHolesWeight + " " + fittest.bumpinessWeight);
+                //out.printf("Fittest in generation %d: <%f,%f,%f,%f,%f,%f,%f> with fitness %d\n", generation, fittest.components[0], fittest.components[1], fittest.components[2], fittest.components[3], fittest.components[4], fittest.components[5], fittest.components[6], fittest.fitness);
+                out.printf("Fittest in generation %d: <%f,%f,%f,%f> with fitness %d\n", generation, fittest.components[0], fittest.components[1], fittest.components[2], fittest.components[3], fittest.fitness);
                 out.close();
             } catch (FileNotFoundException e) {
                 System.err.println("Could not create weights.txt");
@@ -74,23 +73,24 @@ public class JBrainTetrisTuner {
         }
     }
 
-    private void calculateFitnesses(WeightsVector[] vectors) {
-        for (WeightsVector vector : vectors) {
+    private void calculateFitnesses(Vector[] vectors) {
+        for (Vector vector : vectors) {
 //            System.out.print("Starting: ");
 //            printVector(vector);
-            Brain brain = new GeneticBrain(vector.aggHeightWeight, vector.rowsCompWeight, vector.numHolesWeight, vector.bumpinessWeight);
+            Brain brain = new GeneticBrain(vector.components);
             for (int game = 0; game < MAX_GAMES; game++) {
                 Board board = new TetrisBoard(JTetris.WIDTH, JTetris.HEIGHT + JTetris.TOP_SPACE);
-                int numPieces = 1;
+                int numMoves = 0;
                 board.nextPiece(pickNextPiece());
-                while (numPieces < MAX_MOVES && !gameOver(board)) {
+                while (numMoves < MAX_MOVES && !gameOver(board)) {
                     Board.Action nextMove = brain.nextMove(board);
                     board.move(nextMove);
                     if (board.getLastResult() == Board.Result.PLACE) {
-                        numPieces++;
                         board.nextPiece(pickNextPiece());
+                        vector.fitness += board.getRowsCleared();
                     }
-                    vector.fitness += board.getRowsCleared();
+
+                    numMoves++;
                 }
             }
             printVector(vector);
@@ -104,30 +104,24 @@ public class JBrainTetrisTuner {
         return(piece);
     }
 
-    private WeightsVector crossover(WeightsVector one, WeightsVector two) {
-        double newAggHeightWeight = one.aggHeightWeight * one.fitness + two.aggHeightWeight * two.fitness;
-        double newRowsCompWeight = one.rowsCompWeight * one.fitness + two.rowsCompWeight * two.fitness;
-        double newNumHolesWeight = one.numHolesWeight * one.fitness + two.numHolesWeight * two.fitness;
-        double newBumpinessWeight = one.bumpinessWeight * one.fitness + two.bumpinessWeight * two.fitness;
-        WeightsVector result = new WeightsVector(newAggHeightWeight, newRowsCompWeight, newNumHolesWeight, newBumpinessWeight);
-        result.unitize();
-        return result;
+    private Vector crossover(Vector one, Vector two) {
+        Vector child = new Vector(one.numComponents);
+        for (int i = 0; i < one.numComponents; i++) {
+            child.components[i] = one.components[i] * one.fitness + two.components[i] * two.fitness;
+        }
+
+        child.unitize();
+        return child;
     }
 
     /**
      * Mutates a given vector. A randomly selected attribute is changed by +/- 0.2
      * @param vector the vector to be mutated
      */
-    private void mutate(WeightsVector vector) {
-        int attribute = (int) (Math.random() * 4) + 1;
+    private void mutate(Vector vector) {
+        int attribute = (int) (Math.random() * vector.numComponents);
         double mutation = Math.random() * 0.4 - 0.2;
-        switch (attribute) {
-            case 1: vector.aggHeightWeight += mutation; break;
-            case 2: vector.rowsCompWeight += mutation; break;
-            case 3: vector.numHolesWeight += mutation; break;
-            case 4: vector.bumpinessWeight += mutation; break;
-        }
-
+        vector.components[attribute] += mutation;
         vector.unitize();
     }
 
@@ -135,7 +129,7 @@ public class JBrainTetrisTuner {
      * Randomly selects a subset of the population and selects the two fittest to be parents for a next generation
      * @param percent the percentage of the population to select
      */
-    private int[] tournamentSelection(int percent) {
+    private Vector tournamentSelection(int percent) {
         // for ease of writing, parentOne fitness must always be greater than parentTwoIndex
         int parentOneIndex = -1;
         int parentTwoIndex = -1;
@@ -156,15 +150,12 @@ public class JBrainTetrisTuner {
                 parentOneIndex = index;
             } else if (parentTwoIndex == -1) {
                 parentTwoIndex = index;
+            } else if (originalPopulation[parentTwoIndex].fitness < originalPopulation[index].fitness) {
+                parentTwoIndex = index;
             }
         }
 
-        // in times like these, you really wish java had tuples like python
-        int[] result = new int[2];
-        result[0] = parentOneIndex;
-        result[1] = parentTwoIndex;
-
-        return result;
+        return crossover(originalPopulation[parentOneIndex], originalPopulation[parentTwoIndex]);
     }
 
     /**
@@ -194,8 +185,9 @@ public class JBrainTetrisTuner {
      * prints all the info of a vector
      * @param vector the vector to print
      */
-    private void printVector(WeightsVector vector) {
-        System.out.println(vector.aggHeightWeight + " " + vector.rowsCompWeight + " " + vector.numHolesWeight + " " + vector.bumpinessWeight + " " + vector.fitness);
+    private void printVector(Vector vector) {
+//        System.out.printf("<%f,%f,%f,%f,%f,%f,%f> %d\n", vector.components[0], vector.components[1], vector.components[2], vector.components[3], vector.components[4], vector.components[5], vector.components[6], vector.fitness);
+        System.out.printf("<%f,%f,%f,%f> %d\n", vector.components[0], vector.components[1], vector.components[2], vector.components[3], vector.fitness);
     }
 
     public static void main(String[] args) {
@@ -207,33 +199,34 @@ public class JBrainTetrisTuner {
      * A helper class that holds a collection of weights
      * Also contains info about its "fitness" i.e. how many rows it is able to clear
      */
-    private class WeightsVector implements Comparable<WeightsVector> {
-        private double aggHeightWeight;
-        private double rowsCompWeight;
-        private double numHolesWeight;
-        private double bumpinessWeight;
+    private class Vector implements Comparable<Vector> {
+        private int numComponents;
+        private double[] components;
         // as described in the source above, the fitness of a vector is how many rows it clears
         private int fitness;
 
-        private WeightsVector(double aggHeightWeight, double rowsCompWeight, double numHolesWeight, double bumpinessWeight) {
-            this.aggHeightWeight = aggHeightWeight;
-            this.rowsCompWeight = rowsCompWeight;
-            this.numHolesWeight = numHolesWeight;
-            this.bumpinessWeight = bumpinessWeight;
+        private Vector(int numComponents) {
+            this.numComponents = numComponents;
+            components = new double[numComponents];
         }
 
         private void unitize() {
-            double len = Math.sqrt(aggHeightWeight * aggHeightWeight + rowsCompWeight * rowsCompWeight + numHolesWeight * numHolesWeight + bumpinessWeight * bumpinessWeight);
-            if (len != 0) {
-                aggHeightWeight /= len;
-                rowsCompWeight /= len;
-                numHolesWeight /= len;
-                bumpinessWeight /= len;
+            double len = 0;
+            for (double i : components) {
+                len += i * i;
+            }
+            len = Math.sqrt(len);
+            if (len == 0) {
+                return;
+            }
+
+            for (int i = 0; i < numComponents; i++) {
+                components[i] /= len;
             }
         }
 
         @Override
-        public int compareTo(WeightsVector o) {
+        public int compareTo(Vector o) {
             return o.fitness - fitness;
         }
     }

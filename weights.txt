@@ -1,0 +1,1 @@
+Fittest in generation 142: <-0.116573,-0.626291,-0.522801,-0.566436> with fitness 81
