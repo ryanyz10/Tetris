@@ -21,7 +21,6 @@ public final class TetrisPiece extends Piece {
 
     private TetrisPiece(Point[] body) {
         this.body = body;
-        // This stuff should ideally be segregated into another method
         HashMap<Integer, Integer> minValues = new HashMap<>();
         int minWidth = Integer.MAX_VALUE, maxWidth = Integer.MIN_VALUE;
         int minHeight = Integer.MAX_VALUE, maxHeight = Integer.MIN_VALUE;

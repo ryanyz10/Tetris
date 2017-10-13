@@ -11,12 +11,18 @@ import assignment.TetrisBoard;
 import assignment.TetrisPiece;
 import testing.PieceConstants;
 
+/**
+ * Class to test board functionality.
+ * Includes tests for every interface function with the goal of checking
+ * both negative and positive test results
+ *
+ */
 public class TetrisBoardTest implements PieceConstants{
 
 	@Test
 	public void invalidBoardWidthTest() {
 		try {
-			Board tetris = new TetrisBoard(-1, 10);
+			new TetrisBoard(-1, 10);
 			fail("Didn't throw illegal width");
 		} catch (IllegalArgumentException iae) {
 			assertNotNull("Successfully caught argument error");
@@ -28,7 +34,7 @@ public class TetrisBoardTest implements PieceConstants{
 	@Test
 	public void invalidBoardHeightTest() {
 		try {
-			Board tetris = new TetrisBoard(10, -1);
+			new TetrisBoard(10, -1);
 			fail("Didn't throw illegal height");
 		} catch (IllegalArgumentException iae) {
 			assertNotNull("Successfully caught argument error");
@@ -40,7 +46,7 @@ public class TetrisBoardTest implements PieceConstants{
 	@Test
 	public void invalidBoardTotalTest() {
 		try {
-			Board tetris = new TetrisBoard(-1, -1);
+			new TetrisBoard(-1, -1);
 			fail("Didn't throw illegal height/width");
 		} catch (IllegalArgumentException iae) {
 			assertNotNull("Successfully caught argument error");
@@ -295,7 +301,7 @@ public class TetrisBoardTest implements PieceConstants{
 
 		//Double-Check
 		assertEquals(testBoard.getRowsCleared(), 1);
-		assertNotEquals(tetris.getRowsCleared(), 0);
+		assertEquals(tetris.getRowsCleared(), 0);
 	}
 	
 	@Test
