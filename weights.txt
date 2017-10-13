@@ -1,1 +1,1 @@
-Fittest in generation 30: <-0.071946,-0.614633,-0.537485,-0.572852> with fitness 79
+Fittest in generation 142: <-0.116573,-0.626291,-0.522801,-0.566436> with fitness 81

@@ -114,8 +114,6 @@ public class GeneticBrain implements Brain {
             }
         }
 
-
-        //System.out.println("Best move is " + firstMove.get(bestIndex) + " with score " + best);
         return firstMove.get(bestIndex);
     }
 
