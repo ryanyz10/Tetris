@@ -54,6 +54,12 @@ public class JBrainTetrisTuner {
             survivalOfTheFittest();
             System.out.println("End darwin");
             Arrays.sort(originalPopulation, Collections.reverseOrder());
+            int totalFitness = 0;
+            for (int i = 0; i < originalPopulation.length; i++) {
+                totalFitness += originalPopulation[i].fitness;
+            }
+
+            System.out.printf("Average: %f", (double)(totalFitness)/POPULATION_SIZE);
 
             try {
                 PrintWriter out = new PrintWriter(new File(weightsFile));
@@ -88,6 +94,7 @@ public class JBrainTetrisTuner {
                 }
             }
             printVector(vector);
+
         }
     }
 
@@ -120,6 +127,8 @@ public class JBrainTetrisTuner {
             case 3: vector.numHolesWeight += mutation; break;
             case 4: vector.bumpinessWeight += mutation; break;
         }
+
+        vector.unitize();
     }
 
     /**
@@ -160,6 +169,7 @@ public class JBrainTetrisTuner {
 
     /**
      * replaces a subset of the old population with the new population
+     * Darwin would be proud
      */
     private void survivalOfTheFittest() {
         for (int i = originalPopulation.length - newPopulation.length; i < originalPopulation.length; i++) {
