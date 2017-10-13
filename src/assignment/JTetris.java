@@ -28,7 +28,7 @@ public class JTetris extends JComponent {
 
     /**
      * Creates a Window,
-     * installs the JTetris or JBrainTetris,
+     * installs the JTetris or JBrainTetrisTuner,
      * checks the testMode state,
      * install the controls in the WEST.
      */

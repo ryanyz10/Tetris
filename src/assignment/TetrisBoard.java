@@ -144,8 +144,8 @@ public final class TetrisBoard implements Board {
     private Board copyBoard() {
         Board clone = new TetrisBoard(width, height);
         ((TetrisBoard) clone).board = copyBooleanMatrix();
-        ((TetrisBoard) clone).updateHeights();
-        ((TetrisBoard) clone).updateWidths();
+        ((TetrisBoard) clone).heights = copyIntArray(this.heights);
+        ((TetrisBoard) clone).widths = copyIntArray(this.widths);
         ((TetrisBoard) clone).nextPiece = nextPiece;
         ((TetrisBoard) clone).pieceX = pieceX;
         ((TetrisBoard) clone).pieceY = pieceY;
@@ -166,6 +166,15 @@ public final class TetrisBoard implements Board {
         }
 
         return clone;
+    }
+
+    private int[] copyIntArray(int[] array) {
+        int[] result = new int[array.length];
+        for (int i = 0; i < result.length; i++) {
+            result[i] = array[i];
+        }
+
+        return result;
     }
 
     /**
@@ -405,6 +414,14 @@ public final class TetrisBoard implements Board {
 
     protected int[] getWidths() {
         return widths;
+    }
+
+    public int getPieceX() {
+        return pieceX;
+    }
+
+    public int getPieceY() {
+        return pieceY;
     }
 
     @Override
