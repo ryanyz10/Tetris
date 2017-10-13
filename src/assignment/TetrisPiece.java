@@ -137,8 +137,8 @@ public final class TetrisPiece extends Piece {
             }
         }
 
-        width = maxWidth - minWidth;
-        height = maxHeight - minHeight;
+        width = maxWidth - minWidth + 1;
+        height = maxHeight - minHeight + 1;
     	
     	Point[] rotated = generateRotation(this.body);
     	if(!original.equals(rotated))

@@ -1,0 +1,1 @@
+Fittest in generation 30: <-0.071946,-0.614633,-0.537485,-0.572852> with fitness 79

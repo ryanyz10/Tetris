@@ -4,18 +4,32 @@ import java.util.ArrayList;
 
 public class GeneticBrain implements Brain {
     // help from here: https://codemyroad.wordpress.com/2013/04/14/tetris-ai-the-near-perfect-player/
-    private double aggHeightWeight;
-    private double rowsCompWeight;
-    private double numHolesWeight;
-    private double bumpinessWeight;
+    private double[] components;
     private ArrayList<Board> options;
     private ArrayList<Board.Action> firstMove;
 
-    public GeneticBrain(double aggHeightWeight, double rowsCompWeight, double numHolesWeight, double bumpinessWeight) {
-        this.aggHeightWeight = aggHeightWeight;
-        this.rowsCompWeight = rowsCompWeight;
-        this.numHolesWeight = numHolesWeight;
-        this.bumpinessWeight = bumpinessWeight;
+    public GeneticBrain(double[] components) {
+        this.components = components;
+    }
+
+    private int getFullCells(Board currentBoard) {
+        int total = 0;
+        int[] widths = ((TetrisBoard) currentBoard).getWidths();
+        for (int i = 0; i < widths.length; i++) {
+            total += widths[i];
+        }
+
+        return total;
+    }
+
+    private int maxSlope(Board currentBoard) {
+        int[] heights = ((TetrisBoard) currentBoard).getHeights();
+        int maxDiff = 0;
+        for (int i = 0; i < heights.length - 1; i++) {
+            maxDiff = Math.max(Math.abs(heights[i] - heights[i + 1]), maxDiff);
+        }
+
+        return maxDiff;
     }
 
     /**
@@ -26,17 +40,13 @@ public class GeneticBrain implements Brain {
      * @return an integer representing the
      */
     private int getAggregateHeight(Board currentBoard) {
-        if (currentBoard instanceof TetrisBoard) {
-            int[] heights = ((TetrisBoard) currentBoard).getHeights();
-            int sum = 0;
-            for (int i : heights) {
-                sum += i;
-            }
-
-            return sum;
+        int[] heights = ((TetrisBoard) currentBoard).getHeights();
+        int sum = 0;
+        for (int i : heights) {
+            sum += i;
         }
 
-        return -1;
+        return sum;
     }
 
     /**
@@ -46,17 +56,14 @@ public class GeneticBrain implements Brain {
      * @return an integer representing the bumpiness of the board
      */
     private int getBumpiness(Board currentBoard) {
-        if (currentBoard instanceof TetrisBoard) {
-            int[] heights = ((TetrisBoard) currentBoard).getHeights();
-            int sum = 0;
-            for (int i = 0; i < heights.length - 1; i++) {
-                sum += Math.abs(heights[i] - heights[i + 1]);
-            }
 
-            return sum;
+        int[] heights = ((TetrisBoard) currentBoard).getHeights();
+        int sum = 0;
+        for (int i = 0; i < heights.length - 1; i++) {
+            sum += Math.abs(heights[i] - heights[i + 1]);
         }
 
-        return -1;
+        return sum;
     }
 
     /**
@@ -65,32 +72,27 @@ public class GeneticBrain implements Brain {
      * @return an integer representing the number of holes in the board
      */
     private int getHoles(Board currentBoard) {
-        if (currentBoard instanceof TetrisBoard) {
-            // we only need to examine to maxHeight since that's the highest filled point
-            int numHoles = 0;
-            for (int x = 0; x < currentBoard.getWidth(); x++) {
-                // flag for whether the column has pieces in it
-                boolean filled = false;
-                for (int y = currentBoard.getHeight() - 1; y >= 0; y--) {
-                    if (currentBoard.getGrid(x, y)) {
-                        filled = true;
-                    } else if (!currentBoard.getGrid(x, y) && filled) {
-                        // if this column has pieces above the current y, but the current y is not filled, then it's a hole
-                        numHoles++;
-                    }
-
+        int numHoles = 0;
+        for (int x = 0; x < currentBoard.getWidth(); x++) {
+            // flag for whether the column has pieces in it
+            boolean filled = false;
+            int maxHeight = currentBoard.getMaxHeight();
+            for (int y = maxHeight - 1; y >= 0; y--) {
+                if (currentBoard.getGrid(x, y)) {
+                    filled = true;
+                } else if (filled && !currentBoard.getGrid(x, y)) {
+                    // if this column has pieces above the current y, but the current y is not filled, then it's a hole
+                    numHoles++;
                 }
             }
-
-            return numHoles;
         }
-
-        return -1;
+        return numHoles;
     }
 
     // calculate the score of a position based on the four things we care about
     private double calculateMoveScore(Board option) {
-        return option.getRowsCleared() * rowsCompWeight + getHoles(option) * numHolesWeight + getBumpiness(option) * bumpinessWeight + getAggregateHeight(option) * aggHeightWeight;
+//        return option.getRowsCleared() * components[0] + getHoles(option) * components[1] + getBumpiness(option) * components[2] + getAggregateHeight(option) * components[3] + components[4] * option.getMaxHeight() + components[5] * getFullCells(option) + components[6] * maxSlope(option);
+        return option.getRowsCleared() * components[0] + getHoles(option) * components[1] + getBumpiness(option) * components[2] + getAggregateHeight(option) * components[3];
     }
 
     @Override
@@ -100,20 +102,20 @@ public class GeneticBrain implements Brain {
 
         genAllMoves(currentBoard);
 
-        double best = -Double.MAX_VALUE;
+        double best = 0;
         int bestIndex = 0;
 
         for (int i = 0; i < options.size(); i++) {
             Board curr = options.get(i);
             double score = calculateMoveScore(curr);
-            if (score > best) {
+            if (best == 0 || score > best) {
                 best = score;
                 bestIndex = i;
             }
         }
 
-        // System.out.println("Best move is " + firstMove.get(bestIndex) + " with score " + best);
 
+        //System.out.println("Best move is " + firstMove.get(bestIndex) + " with score " + best);
         return firstMove.get(bestIndex);
     }
 
