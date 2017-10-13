@@ -17,6 +17,8 @@ public class TetrisBoard implements Board {
     private Result lastResult;
     private int rowsCleared;
     private TetrisPiece nextPiece;
+    private TetrisPiece hold;
+    private boolean held;
     private int pieceX, pieceY;
     private int height, width;
     private int[] heights; // height of pieces in each column
@@ -121,10 +123,27 @@ public class TetrisBoard implements Board {
                         break;
                     }
                 case HOLD:
+                    if (held) {
+                        break;
+                    }
+                    if (hold == null) {
+                        togglePiece(nextPiece);
+                        hold = nextPiece;
+                        lastResult = Result.NO_PIECE;
+                    } else {
+                        TetrisPiece tmp = nextPiece;
+                        togglePiece(nextPiece);
+                        nextPiece(hold);
+                        hold = tmp;
+                        lastResult = Result.SUCCESS;
+                    }
+                    held = true;
                     break;
             }
+
             if (lastResult == Result.PLACE) {
                 nextPiece = null;
+                held = false;
                 updateHeights();
                 updateWidths();
                 clearRows();
