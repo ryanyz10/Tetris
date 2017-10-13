@@ -10,7 +10,6 @@ Tetris game and bot for playing Tetris
 ## Bugs/Fixing/Todo
 ### Todo
 * Implement dropHeight method
-* Wallkicks
 ### Fixes
 * Use the Sanity checks provided
 * The I needs to be lifted up a y value at creation to fix weird rotation Behavior

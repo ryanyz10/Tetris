@@ -6,6 +6,14 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.StringTokenizer;
 
+/**
+ * Interface for use in testing.
+ * Includes definitions of pieces and their rotations for easy checking/creation
+ * during testing.
+ * Also includes two default methods taken from two different class to allow changes to be
+ * made for testing sake, and to provide easy access for the testing methods.
+ *
+ */
 public interface PieceConstants {
 	
 	//How 'I' is passed

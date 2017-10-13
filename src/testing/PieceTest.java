@@ -3,16 +3,18 @@ package testing;
 import static org.junit.Assert.*;
 
 import java.awt.Point;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.StringTokenizer;
 
 import org.junit.Test;
 
 import assignment.Piece;
 import assignment.TetrisPiece;
 
+/**
+ * Class that tests piece interface functions.
+ * Written with main goal of testing rotations, but other
+ * functionality is included to complete the testing suite
+ *
+ */
 public class PieceTest implements PieceConstants {
 	
 	/**
@@ -271,5 +273,42 @@ public class PieceTest implements PieceConstants {
 		blockBody = block.getBody();
 		correctBody = this.parsePoints(PieceConstants.tShape90);
 		assertTrue(this.pointEquals(blockBody, correctBody));
+	}
+
+	@Test
+	public void getHeightTest() {
+		Piece block = TetrisPiece.getPiece(PieceConstants.iShapeDeclaration);
+		assertEquals(block.getHeight(), 1);
+		
+		block = TetrisPiece.getPiece(PieceConstants.rightLShape180);
+		assertEquals(block.getHeight(), 2);
+	}
+	
+	@Test
+	public void getWidthTest() {
+		Piece block = TetrisPiece.getPiece(PieceConstants.iShapeDeclaration);
+		assertEquals(block.getWidth(), 4);
+		
+		block = TetrisPiece.getPiece(PieceConstants.rightLShape180);
+		assertEquals(block.getWidth(), 3);
+	}
+
+	@Test
+	public void getSkirtTest() {
+		Piece block = TetrisPiece.getPiece(PieceConstants.iShapeDeclaration);
+		assertEquals(block.getSkirt()[0], 0);
+		
+		block = TetrisPiece.getPiece(PieceConstants.tShape);
+		assertEquals(block.getSkirt()[0], 1);
+		assertEquals(block.getSkirt()[1], 0);
+		assertEquals(block.getSkirt()[2], 1);
+	}
+	
+	@Test
+	public void equalityTest() {
+		Piece block = TetrisPiece.getPiece(PieceConstants.iShapeDeclaration);
+		assertEquals(block, parsePoints("2 1  1 1  0 1  3 1"));
+		
+		assertNotEquals(block, parsePoints(PieceConstants.leftLShape270));
 	}
 }
