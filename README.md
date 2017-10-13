@@ -35,6 +35,7 @@ Tetris game and bot for playing Tetris
 |Ryan|2|10/12/2017|Yes|More bug fixes, refactoring and genetic algorithm|
 |Matthew|2.5|10/12/17|Yes|Wall Kicks and piece state reflection|
 |Matthew|4|10/12/17|Yes|Board Testing|
+|Matthew|2|10/13/17|Yes|Testing Completion|
 
 ### Fixing Last Lab - Our Issues
 #### Negatives

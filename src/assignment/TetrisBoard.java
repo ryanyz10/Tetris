@@ -25,6 +25,9 @@ public final class TetrisBoard implements Board {
 
     // JTetris will use this constructor
     public TetrisBoard(int width, int height) {
+    	if(width < 4 || height < 4) {
+    		throw new IllegalArgumentException("Invalid Board Size! Both width and height must be greater than 3.");
+    	}
         this.height = height;
         this.width = width;
         board = new boolean[height][width];
@@ -88,7 +91,6 @@ public final class TetrisBoard implements Board {
                         break;
                     }
                 case CLOCKWISE: {
-                        // TODO: wallkicks
                         togglePiece(nextPiece);
                         int nextState = (pieceState+1) % 4;
                         TetrisPiece tempPiece = wallKick(clockwise(nextPiece), nextState);
@@ -121,12 +123,12 @@ public final class TetrisBoard implements Board {
                     break;
             }
             if (lastResult == Result.PLACE) {
+                nextPiece = null;
                 updateHeights();
                 updateWidths();
                 clearRows();
             }
         }
-
         return lastResult;
     }
 
@@ -377,7 +379,7 @@ public final class TetrisBoard implements Board {
      * @return value representing max distance the piece can fall
      */
     private int getMaxDropHeight() {
-        int minDrop = JTetris.HEIGHT + JTetris.TOP_SPACE;
+        int minDrop = Integer.MAX_VALUE;
         for (Point point : nextPiece.getGameBody()) {
             int currDrop = pieceY + point.y - heights[pieceX + point.x];
             minDrop = Math.min(currDrop, minDrop);
@@ -433,10 +435,12 @@ public final class TetrisBoard implements Board {
         togglePiece(nextPiece);
     }
 
+    //For Absolute Equality
     @Override
     public boolean equals(Object other) {
         if (other instanceof TetrisBoard) {
-            boolean[][] otherBoard = ((TetrisBoard) other).board;
+        	TetrisBoard otherTet = ((TetrisBoard) other);
+            boolean[][] otherBoard = otherTet.board;
             for (int i = 0; i < board.length; i++) {
                 for (int j = 0; j < board[i].length; j++) {
                     if (board[i][j] != otherBoard[i][j]) {
@@ -444,7 +448,25 @@ public final class TetrisBoard implements Board {
                     }
                 }
             }
-
+            
+            if(otherTet.rowsCleared != this.rowsCleared)
+            	return false;
+            
+            if(this.nextPiece != null && !(otherTet.nextPiece.equals(this.nextPiece)))
+            	return false;
+            
+            if(otherTet.getLastAction() != this.getLastAction())
+            	return false;
+            
+            if(otherTet.getLastResult() != this.getLastResult())
+            	return false;
+            
+            if(otherTet.getPieceX() != this.getPieceX())
+            	return false;
+            
+            if(otherTet.getPieceY() != this.getPieceY())
+            	return false;
+            
             return true;
         }
 
@@ -486,10 +508,17 @@ public final class TetrisBoard implements Board {
         return maxHeight;
     }
 
-    // TODO implement method
     @Override
     public int dropHeight(Piece piece, int x) {
-        return -1;
+    	
+        int minDrop = JTetris.HEIGHT + JTetris.TOP_SPACE;
+        for (Point point : ((TetrisPiece) piece).getGameBody()) {
+            int currDrop = (JTetris.HEIGHT - 1) + point.y - heights[x + point.x];
+            minDrop = Math.min(currDrop, minDrop);
+        }
+        
+
+        return JTetris.HEIGHT - minDrop;
     }
 
     @Override

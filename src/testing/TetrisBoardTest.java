@@ -115,9 +115,9 @@ public class TetrisBoardTest implements PieceConstants{
 	@Test
 	public void moveDownEnitreValidTest() {
 		Board tetris = new TetrisBoard(JTetris.WIDTH, JTetris.HEIGHT);
-		Piece iP = TetrisPiece.getPiece(PieceConstants.iShapeDeclaration);
+		Piece iP = TetrisPiece.getPiece(PieceConstants.tShape);
 		tetris.nextPiece(iP);
-		for(int y = 0; y<JTetris.HEIGHT; y++)
+		for(int y = 0; y<JTetris.HEIGHT - 4; y++)
 			tetris.move(Board.Action.DOWN);
 		
 		assertEquals(tetris.move(Board.Action.DOWN), Board.Result.PLACE);
@@ -131,7 +131,7 @@ public class TetrisBoardTest implements PieceConstants{
 		for(int y = 0; y<=JTetris.HEIGHT; y++)
 			tetris.move(Board.Action.DOWN);
 		
-		assertEquals(tetris.move(Board.Action.DOWN), Board.Result.PLACE);
+		assertEquals(tetris.move(Board.Action.DOWN), Board.Result.NO_PIECE);
 	}
 	
 	@Test
@@ -173,8 +173,9 @@ public class TetrisBoardTest implements PieceConstants{
 		tetris.move(Board.Action.DROP);
 		
 		iP = TetrisPiece.getPiece(PieceConstants.iShape);
+		tetris.nextPiece(iP);
 		tetris.move(Board.Action.CLOCKWISE);
-		for(int y = 0; y<JTetris.HEIGHT; y++)
+		for(int y = 0; y<JTetris.HEIGHT-4; y++)
 			tetris.move(Board.Action.DOWN);
 		
 		assertEquals(tetris.move(Board.Action.CLOCKWISE), Board.Result.SUCCESS);
@@ -192,14 +193,25 @@ public class TetrisBoardTest implements PieceConstants{
 		iP = TetrisPiece.getPiece(PieceConstants.iShape);
 		tetris.nextPiece(iP);
 		tetris.move(Board.Action.CLOCKWISE);
+		tetris.move(Board.Action.RIGHT);
+		tetris.move(Board.Action.DROP);
+		iP = TetrisPiece.getPiece(PieceConstants.iShape);
+		tetris.nextPiece(iP);
+		tetris.move(Board.Action.CLOCKWISE);
 		tetris.move(Board.Action.LEFT);
 		tetris.move(Board.Action.DROP);
+		iP = TetrisPiece.getPiece(PieceConstants.iShape);
+		tetris.nextPiece(iP);
+		tetris.move(Board.Action.CLOCKWISE);
+		tetris.move(Board.Action.LEFT);
+		tetris.move(Board.Action.DROP);
+		
 		
 		
 		iP = TetrisPiece.getPiece(PieceConstants.iShape);
 		tetris.nextPiece(iP);
 		tetris.move(Board.Action.CLOCKWISE);
-		for(int y = 0; y<JTetris.HEIGHT-1; y++)
+		for(int y = 0; y<JTetris.HEIGHT-4; y++)
 			tetris.move(Board.Action.DOWN);
 		
 		assertEquals(tetris.move(Board.Action.CLOCKWISE), Board.Result.OUT_BOUNDS);
@@ -220,12 +232,13 @@ public class TetrisBoardTest implements PieceConstants{
 		Piece iP = TetrisPiece.getPiece(PieceConstants.iShape);
 		tetris.nextPiece(iP);
 		tetris.move(Board.Action.COUNTERCLOCKWISE);
-		tetris.move(Board.Action.RIGHT);
+		tetris.move(Board.Action.LEFT);
 		tetris.move(Board.Action.DROP);
 		
 		iP = TetrisPiece.getPiece(PieceConstants.iShape);
+		tetris.nextPiece(iP);
 		tetris.move(Board.Action.COUNTERCLOCKWISE);
-		for(int y = 0; y<JTetris.HEIGHT; y++)
+		for(int y = 0; y<JTetris.HEIGHT-4; y++)
 			tetris.move(Board.Action.DOWN);
 		
 		assertEquals(tetris.move(Board.Action.COUNTERCLOCKWISE), Board.Result.SUCCESS);
@@ -243,6 +256,16 @@ public class TetrisBoardTest implements PieceConstants{
 		iP = TetrisPiece.getPiece(PieceConstants.iShape);
 		tetris.nextPiece(iP);
 		tetris.move(Board.Action.COUNTERCLOCKWISE);
+		tetris.move(Board.Action.RIGHT);
+		tetris.move(Board.Action.DROP);
+		iP = TetrisPiece.getPiece(PieceConstants.iShape);
+		tetris.nextPiece(iP);
+		tetris.move(Board.Action.COUNTERCLOCKWISE);
+		tetris.move(Board.Action.LEFT);
+		tetris.move(Board.Action.DROP);
+		iP = TetrisPiece.getPiece(PieceConstants.iShape);
+		tetris.nextPiece(iP);
+		tetris.move(Board.Action.COUNTERCLOCKWISE);
 		tetris.move(Board.Action.LEFT);
 		tetris.move(Board.Action.DROP);
 		
@@ -250,7 +273,7 @@ public class TetrisBoardTest implements PieceConstants{
 		iP = TetrisPiece.getPiece(PieceConstants.iShape);
 		tetris.nextPiece(iP);
 		tetris.move(Board.Action.COUNTERCLOCKWISE);
-		for(int y = 0; y<JTetris.HEIGHT-1; y++)
+		for(int y = 0; y<JTetris.HEIGHT-4; y++)
 			tetris.move(Board.Action.DOWN);
 		
 		assertEquals(tetris.move(Board.Action.COUNTERCLOCKWISE), Board.Result.OUT_BOUNDS);
@@ -379,7 +402,7 @@ public class TetrisBoardTest implements PieceConstants{
 	public void dropHeightFloorTest() {
 		Board tetris = new TetrisBoard(JTetris.WIDTH, JTetris.HEIGHT);
 		Piece iP = TetrisPiece.getPiece(PieceConstants.iShapeDeclaration);
-		assertEquals(tetris.dropHeight(iP, 0), tetris.getHeight());
+		assertEquals(tetris.dropHeight(iP, 0), 0);
 	}
 	
 	@Test
@@ -389,7 +412,7 @@ public class TetrisBoardTest implements PieceConstants{
 		tetris.nextPiece(iP);
 		tetris.move(Board.Action.DROP);
 		iP = TetrisPiece.getPiece(PieceConstants.iShapeDeclaration);
-		assertEquals(tetris.dropHeight(iP, 4), tetris.getHeight()-1);
+		assertEquals(tetris.dropHeight(iP, JTetris.WIDTH/2), 1);
 	}
 	
 	@Test
