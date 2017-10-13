@@ -48,3 +48,11 @@ Tetris game and bot for playing Tetris
 #### Positives
 * Good test coverage of positive/negative and unit/integration tests
 * He was impressed by brevity (shortest report of all)
+
+### Assumptions
+* We assumed pieces would be given in a certain way - every time. (The way being how they are written in JTetris) (This probably our biggest and most dangerous assumption)
+* We assumed their would only be 7 different pieces, and thus 3 different classifications for them (Square, "I", Other)
+* We assumed a board would have to be at least 4x4 (to fit the "I") piece, if not we throw an error
+* For the clockwise function we assume that the object will have 4 rotations (excluding Square) so we can call counterclockwise 3 times
+
+
