@@ -15,6 +15,12 @@ import assignment.TetrisPiece;
 
 public class PieceTest implements PieceConstants {
 	
+	/**
+	 * I decided to put multiple assertions in one test in this scenario
+	 * because it made sense to me. I didn't think it was a good idea to split
+	 * up rotation testing because to get certain rotations, I would need to rotate
+	 * through others
+	 */
 	@Test
 	public void iShapeRotationTest() {
 		Piece block = TetrisPiece.getPiece("0 0  1 0  2 0  3 0");
@@ -265,44 +271,5 @@ public class PieceTest implements PieceConstants {
 		blockBody = block.getBody();
 		correctBody = this.parsePoints(PieceConstants.tShape90);
 		assertTrue(this.pointEquals(blockBody, correctBody));
-	}
-	
-	
-	/**
-	 * Implementation taken from Piece.java
-	 * @param string
-	 * @return
-	 */
-	private Point[] parsePoints(String string) {
-        ArrayList<Point> points = new ArrayList<>();
-        StringTokenizer tok = new StringTokenizer(string);
-        try {
-            while(tok.hasMoreTokens()) {
-                int x = Integer.parseInt(tok.nextToken());
-                int y = Integer.parseInt(tok.nextToken());
-
-                points.add(new Point(x, y));
-            }
-        } catch (NumberFormatException e) {
-            throw new RuntimeException("Could not parse x,y string:" + string);
-        }
-
-        Point[] array = new Point[0];
-        array = points.toArray(array);
-        return array;
-    }
-
-	/**
-	 * Implementation taken from TetrisPiece.java
-	 */
-	private boolean pointEquals(Point[] shapeOut, Point[] shapeExpected) {
-		Set<Point> tmp = new HashSet<Point>();
-		// since each block is made of 4 and only 4 points, we can check both here
-		for (int i = 0; i < shapeOut.length; i++) {
-			tmp.add(shapeOut[i]);
-			tmp.add(shapeExpected[i]);
-		}
-
-		return tmp.size() == 4;
 	}
 }

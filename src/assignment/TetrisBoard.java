@@ -95,6 +95,9 @@ public final class TetrisBoard implements Board {
                         if(tempPiece != null) {
                         	nextPiece = tempPiece;
                         	pieceState = nextState;
+                        	lastResult = Result.SUCCESS;
+                        } else {
+                        	lastResult = Result.OUT_BOUNDS;
                         }
                         togglePiece(nextPiece);
                         break;
@@ -106,6 +109,9 @@ public final class TetrisBoard implements Board {
                         if(tempPiece != null) {
                         	nextPiece = tempPiece;
                         	pieceState = nextState;
+                        	lastResult = Result.SUCCESS;
+                        } else {
+                        	lastResult = Result.OUT_BOUNDS;
                         }
                         
                         togglePiece(nextPiece);
