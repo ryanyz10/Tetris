@@ -3,6 +3,9 @@ package testing;
 import static org.junit.Assert.*;
 
 import java.awt.Point;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.junit.Test;
 
@@ -37,7 +40,7 @@ public class PieceTest implements PieceConstants {
 		//180 Degrees
 		block = block.nextRotation();
 		blockBody = block.getBody();
-		correctBody = this.parsePoints(PieceConstants.iShape180);
+		correctBody = this.parsePoints(PieceConstants.iShape);
 		
 		assertTrue(this.pointEquals(blockBody, correctBody));
 		
@@ -51,7 +54,7 @@ public class PieceTest implements PieceConstants {
 		//360 Degrees
 		block = block.nextRotation();
 		blockBody = block.getBody();
-		correctBody = this.parsePoints(PieceConstants.iShape);
+		correctBody = this.parsePoints(PieceConstants.iShapeDeclaration);
 		
 		assertTrue(this.pointEquals(blockBody, correctBody));
 		
@@ -310,5 +313,22 @@ public class PieceTest implements PieceConstants {
 		assertEquals(block, parsePoints("2 1  1 1  0 1  3 1"));
 		
 		assertNotEquals(block, parsePoints(PieceConstants.leftLShape270));
+	}
+	
+	// All pieces should have equivalent game and normal bodies
+	@Test
+	public void gamePieceEqualTest() {
+		TetrisPiece block = (TetrisPiece) TetrisPiece.getPiece(PieceConstants.tShape);
+		assertTrue(Arrays.deepEquals(block.getGameBody(), block.getBody()));
+		
+		block = (TetrisPiece) block.nextRotation();
+		assertTrue(Arrays.deepEquals(block.getGameBody(), block.getBody()));
+	}
+	
+	// The I piece is a special case for rotation/representation
+	@Test
+	public void gamePieceUnequalTest() {
+		TetrisPiece block = (TetrisPiece) TetrisPiece.getPiece(PieceConstants.iShapeDeclaration);
+		assertFalse(Arrays.deepEquals(block.getGameBody(), block.getBody()));
 	}
 }

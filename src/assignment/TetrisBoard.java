@@ -309,7 +309,7 @@ public class TetrisBoard implements Board {
     	//Check all cases
     	tests_label:
     	for(int testCase = 0; testCase+1 < tests.length; testCase+=2) {
-    		for(Point po: p.getBody()) {
+    		for(Point po: p.getGameBody()) {
     			int newX = (int) (po.getX() + this.pieceX + (changeSign?-1:1) * tests[testCase]);
         		int newY = (int) (po.getY() + this.pieceY + (changeSign?-1:1) * tests[testCase+1]);
     			if((newX < 0 || newX >= width) || (yToRow(newY)<0 || yToRow(newY) >= height) || board[yToRow(newY)][newX])
@@ -329,7 +329,7 @@ public class TetrisBoard implements Board {
      * @return true if nextPiece can move left, false otherwise
      */
     private boolean canMoveLeft() {
-        for (Point point : nextPiece.getBody()) {
+        for (Point point : nextPiece.getGameBody()) {
             int newX = point.x + pieceX - 1;
             if (newX < 0 || board[yToRow(pieceY)][newX]) {
                 return false;
@@ -344,7 +344,7 @@ public class TetrisBoard implements Board {
      * @return true if p can move right, false otherwise
      */
     private boolean canMoveRight() {
-        for (Point point : nextPiece.getBody()) {
+        for (Point point : nextPiece.getGameBody()) {
             int newX = point.x + pieceX + 1;
             if (newX >= width || board[yToRow(pieceY)][newX]) {
                 return false;
@@ -360,7 +360,7 @@ public class TetrisBoard implements Board {
      * @return true if nextPiece can be moved down length of distance, false otherwise
      */
     private boolean canMoveDown(int distance) {
-        for (Point point : nextPiece.getBody()) {
+        for (Point point : nextPiece.getGameBody()) {
             int newY = pieceY + point.y - distance;
             int row = yToRow(newY);
             if (row < 0 || row >= height || board[row][pieceX + point.x]) {
@@ -379,7 +379,7 @@ public class TetrisBoard implements Board {
      */
     private int getMaxDropHeight() {
         int minDrop = JTetris.HEIGHT + JTetris.TOP_SPACE;
-        for (Point point : nextPiece.getBody()) {
+        for (Point point : nextPiece.getGameBody()) {
             int currDrop = pieceY + point.y - heights[pieceX + point.x];
             minDrop = Math.min(currDrop, minDrop);
         }
@@ -402,7 +402,7 @@ public class TetrisBoard implements Board {
      * @param p the piece being moved
      */
     private void togglePiece(TetrisPiece p) {
-        for (Point point : p.getBody()) {
+        for (Point point : p.getGameBody()) {
             int r = yToRow(pieceY + point.y);
             int c = point.x + pieceX;
             board[r][c] = !board[r][c];
