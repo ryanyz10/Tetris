@@ -14,6 +14,7 @@ import java.util.Set;
  */
 public final class TetrisPiece extends Piece {
     private Point[] body;
+    private Point[] gameBody; // More accurate representation of piece for use on board
     private int width;
     private int height;
     private int[] skirt;
@@ -21,6 +22,7 @@ public final class TetrisPiece extends Piece {
 
     private TetrisPiece(Point[] body) {
         this.body = body;
+        this.gameBody = body;
         HashMap<Integer, Integer> minValues = new HashMap<>();
         int minWidth = Integer.MAX_VALUE, maxWidth = Integer.MIN_VALUE;
         int minHeight = Integer.MAX_VALUE, maxHeight = Integer.MIN_VALUE;
@@ -86,23 +88,24 @@ public final class TetrisPiece extends Piece {
         		newBody[pointI] = new Point();
         		newBody[pointI].setLocation(body[pointI].getX(), body[pointI].getY() + 1);
         	}
-        	this.body = newBody;
+        	this.gameBody = newBody;
         }
         // line, square or other
         // there will always be 4 rotations
-        Point[] rotated = generateRotation(body);
-        this.next = new TetrisPiece(rotated, this); 
+        Point[] rotated = generateRotation(gameBody);
+        this.next = new TetrisPiece(rotated, this);
     }
 
     // separate constructor for creating rotations
     // using the original constructor caused an infinite recursion
     private TetrisPiece(Point[] body, TetrisPiece original) {
     	this.body = body;
+    	this.gameBody = body;
     	this.pieceType = original.getPieceType();
         HashMap<Integer, Integer> minValues = new HashMap<>();
         int minWidth = Integer.MAX_VALUE, maxWidth = Integer.MIN_VALUE;
         int minHeight = Integer.MAX_VALUE, maxHeight = Integer.MIN_VALUE;
-        for (Point point : body) {
+        for (Point point : gameBody) {
             if (point.y > maxHeight) {
                 maxHeight = point.y;
             }
@@ -139,11 +142,40 @@ public final class TetrisPiece extends Piece {
 
         width = maxWidth - minWidth;
         height = maxHeight - minHeight;
+        
+        // Correct Original Body for API
+        if(pieceType == 1) {
+        	Point[] apiFix = new Point[4];
+        	// Horizontal Fix
+        	if(width == 3) {
+        		for(int ind = 0; ind<4; ind++) {
+        			Point temp = new Point();
+        			temp.setLocation(body[ind].getX(), body[ind].getY()-1);
+        			apiFix[ind] = temp;
+        		}
+        	}
+        	
+        	//Vertical Fix
+        	if(height == 3) {
+        		for(int ind = 0; ind<4; ind++) {
+        			//Create New Point
+        			Point temp = new Point();
+        			temp.setLocation(body[ind].getX()-1, body[ind].getY());
+        			apiFix[ind] = temp;
+        			
+        			//Correct GameBody
+        			this.gameBody[ind].x -= 1;
+        		}
+        	}
+        	
+        	this.body = apiFix;
+        	
+        }
     	
-    	Point[] rotated = generateRotation(this.body);
-    	if(!original.equals(rotated))
+    	Point[] rotated = generateRotation(this.gameBody);
+    	if(!original.equals(rotated)) {
     		this.next = new TetrisPiece(rotated, original);
-    	else {
+    	} else {
     		this.next = original;
     	}
     }
@@ -233,7 +265,9 @@ public final class TetrisPiece extends Piece {
     public int[] getSkirt() { return skirt; }
     
     public int getPieceType() { return pieceType; }
-
+    
+    public Point[] getGameBody() { return gameBody; }
+    
     @Override
     public boolean equals(Object other) {
         // use a set because we can't be sure of the order points are given to us
@@ -249,8 +283,8 @@ public final class TetrisPiece extends Piece {
         } else if(other instanceof Point[]) {
         	Set<Point> tmp = new HashSet<>();
     		// since each block is made of 4 and only 4 points, we can check both here
-    		for (int i = 0; i < this.body.length; i++) {
-    			tmp.add(this.body[i]);
+    		for (int i = 0; i < this.gameBody.length; i++) {
+    			tmp.add(this.gameBody[i]);
     			tmp.add(((Point[])other)[i]);
     		}
 
